@@ -147,7 +147,8 @@ export async function runRelay(body: Call | Call[], deps: RelayDeps): Promise<{ 
   const calls = Array.isArray(body) ? body : [body];
   const targets = readTargets();
   // Priced with every named address allowed first, so a refused target still costs budget.
-  const priced = checkBatch(calls, new Set([...targets, ...namedAddresses(body)]));
+  // Priced on a copy: checkBatch fills in a gas cap, and the known-target cap must not leak into the real check below.
+  const priced = checkBatch(structuredClone(calls), new Set([...targets, ...namedAddresses(body)]));
   if ("error" in priced) return { status: 400, body: { error: priced.error } };
   const refused = await deps.charge(priced.units);
   if (refused) return { status: 429, body: { error: refused } };

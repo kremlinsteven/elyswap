@@ -26,3 +26,15 @@ export const GithubIcon = (p: P) => (
 );
 export const ArrowRight = (p: P) => <S {...p}><path d="M2.5 8h11M9 3.5L13.5 8 9 12.5" /></S>;
 export const ArrowDownRight = (p: P) => <S {...p}><path d="M4 4l8 8M12 6v6H6" /></S>;
+export const ClockIcon = (p: P) => <S {...p}><circle cx="8" cy="8" r="6" /><path d="M8 4.5V8l2.5 1.5" /></S>;
+export const HourglassIcon = (p: P) => <S {...p}><path d="M4 2h8M4 14h8M5 2c0 3 6 3 6 6s-6 3-6 6M11 2c0 3-6 3-6 6s6 3 6 6" /></S>;
+export const StackIcon = (p: P) => <S {...p}><path d="M8 2l6 3-6 3-6-3zM2 8l6 3 6-3M2 11l6 3 6-3" /></S>;
+export const ClaimIcon = (p: P) => <S {...p}><path d="M8 2v8M4.5 6.5L8 10l3.5-3.5M3 13h10" /></S>;
+export const RouteIcon = (p: P) => <S {...p}><circle cx="3.5" cy="11.5" r="1.8" /><circle cx="12.5" cy="11.5" r="1.8" /><path d="M5 10C6 4 10 4 11 10" /></S>;
+export const PinIcon = (p: P) => <S {...p}><path d="M8 14s-4.5-4.2-4.5-7.5a4.5 4.5 0 0 1 9 0C12.5 9.8 8 14 8 14z" /><circle cx="8" cy="6.5" r="1.5" /></S>;
+export const BookIcon = (p: P) => <S {...p}><path d="M3 2.5h7.5a2 2 0 0 1 2 2V14H5a2 2 0 0 1-2-2zM3 12a2 2 0 0 1 2-2h7.5" /></S>;
+export const PulseIcon = (p: P) => <S {...p}><path d="M1.5 8h3l1.5-4 3 8 1.5-4h4" /></S>;
+export const ShieldIcon = (p: P) => <S {...p}><path d="M8 1.8l5 2v4c0 3.2-2.2 5.3-5 6.4-2.8-1.1-5-3.2-5-6.4v-4z" /></S>;
+export const CoinsIcon = (p: P) => <S {...p}><ellipse cx="6" cy="5" rx="4" ry="2" /><path d="M2 5v3c0 1.1 1.8 2 4 2s4-.9 4-2V5" /><path d="M7 11.8c.6.1 1.3.2 2 .2 2.2 0 4-.9 4-2V7" /></S>;
+export const AlertIcon = (p: P) => <S {...p}><path d="M8 2l6.5 11.5h-13zM8 6.5v3.2M8 11.6v.1" /></S>;
+export const HandIcon = (p: P) => <S {...p}><path d="M5.5 8V3.5a1 1 0 0 1 2 0V7M7.5 7V2.5a1 1 0 0 1 2 0V7M9.5 7V3.5a1 1 0 0 1 2 0V9c0 3-1.8 5-4.5 5S3 12 3 10V7.5a1 1 0 0 1 2 0V9" /></S>;
