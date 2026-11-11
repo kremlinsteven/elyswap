@@ -105,7 +105,8 @@ export async function quoteHop(route: RouteDef, index: number, amountIn: bigint,
   if (hop.bridge === "canonical") return { ...base, amountOut: amountIn.toString(), decimalsOut: 18 };
   const fromSolana = hop.from === "solana";
   const user = fromSolana ? (who.solana && isSolAddress(who.solana) ? who.solana : PREVIEW_SOL) : who.user && isEvmAddress(who.user) ? who.user : PREVIEW_EVM;
-  const recipient = hop.to === "solana" ? (who.solana && isSolAddress(who.solana) ? who.solana : PREVIEW_SOL) : who.user && isEvmAddress(who.user) ? who.user : undefined;
+  // The receiver is always named: a hop from Solana to an EVM chain would otherwise default to the Solana sender.
+  const recipient = hop.to === "solana" ? (who.solana && isSolAddress(who.solana) ? who.solana : PREVIEW_SOL) : who.user && isEvmAddress(who.user) ? who.user : PREVIEW_EVM;
   const r = await relayQuote({
     user,
     ...(recipient ? { recipient } : {}),

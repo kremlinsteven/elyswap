@@ -16,7 +16,7 @@ const toneOf = (s: string | null | undefined) => (s === "confirmed" || s === "su
 const txLink = (chain: string, hash: string) => (chain in CHAINS ? CHAINS[chain as ChainKey].txUrl(hash) : null);
 
 /** A hop list kept in this browser only, so a multi-hop journey can be followed without any account. */
-type Saved = { chain: ChainKey; tx: string };
+type Saved = { chain: ChainKey; tx: string; rid?: string };
 const STORE = "es1.hops";
 
 export function TrackView() {
@@ -34,7 +34,8 @@ export function TrackView() {
     const q = new URLSearchParams(window.location.search);
     const c = q.get("chain") as ChainKey | null;
     const t = q.get("tx");
-    if (c && c in CHAINS && t && !saved.some((h) => h.tx === t)) saved = [...saved, { chain: c, tx: t }];
+    const rid = q.get("rid");
+    if (c && c in CHAINS && t && !saved.some((h) => h.tx === t)) saved = [...saved, { chain: c, tx: t, ...(rid && /^0x[0-9a-fA-F]{64}$/.test(rid) ? { rid } : {}) }];
     // Restoring this browser's list once on load.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHops(saved.slice(-8));
@@ -101,7 +102,7 @@ function HopCard({ n, hop, onRemove }: { n: number; hop: Saved; onRemove: () => 
     let stop = false;
     const load = async () => {
       if (document.hidden) return;
-      const res = await fetch(`/api/track?chain=${hop.chain}&tx=${hop.tx}`, { cache: "no-store" }).catch(() => null);
+      const res = await fetch(`/api/track?chain=${hop.chain}&tx=${hop.tx}${hop.rid ? `&rid=${hop.rid}` : ""}`, { cache: "no-store" }).catch(() => null);
       const j = (await res?.json().catch(() => null)) as (Answer & { error?: string }) | null;
       if (stop) return;
       if (!res?.ok || !j || j.error) setErr(j?.error ?? "Could not read this hop right now.");

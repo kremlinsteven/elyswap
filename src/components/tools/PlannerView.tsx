@@ -390,7 +390,7 @@ function HopRun({ route, index, address, solana, fixedAmount, manualAmount, setM
               <a className="underline" href={CHAINS[hop.from].txUrl(s.tx)} target="_blank" rel="noreferrer">
                 {s.tx.slice(0, 12)}…
               </a>{" "}
-              · <Link className="underline" href={`/track?chain=${hop.from}&tx=${s.tx}`}>track this hop</Link>
+              · <Link className="underline" href={`/track?chain=${hop.from}&tx=${s.tx}${s.quote?.requestId ? `&rid=${s.quote.requestId}` : ""}`}>track this hop</Link>
               {s.delivered?.length ? (
                 <>
                   {" "}

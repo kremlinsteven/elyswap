@@ -8,7 +8,7 @@ export const maxDuration = 30;
 
 /*
  * Measured Relay delivery times for HYPE leaving Elysium, from Relay's own request log: origin transaction time to
- * destination transaction time, per destination chain. Up to 200 recent requests, recomputed every 10 minutes and
+ * destination transaction time, per destination chain. Up to 150 recent requests, recomputed every 30 minutes (Relay rate-limits its keyless log) and
  * shared by every visitor. Falls back to the dated snapshot when the log cannot be read.
  */
 
@@ -20,7 +20,7 @@ async function compute(): Promise<Stats> {
   const all: RelayRequest[] = [];
   let continuation: string | null = null;
   let api: string | null = null;
-  for (let page = 0; page < 4; page++) {
+  for (let page = 0; page < 3; page++) {
     const r = await relayRequests({ originChainId: "99901", limit: "50", ...(continuation ? { continuation } : {}) });
     if (!r) break;
     api = r.version;
@@ -50,14 +50,14 @@ async function compute(): Promise<Stats> {
 }
 
 export async function GET() {
-  if (!cache || Date.now() - cache.at > 10 * 60_000) {
+  if (!cache || Date.now() - cache.at > 30 * 60_000) {
     inflight ??= compute().finally(() => {
       inflight = null;
     });
     try {
       cache = { at: Date.now(), value: await inflight };
     } catch {
-      if (!cache) cache = { at: Date.now() - 9 * 60_000, value: { source: "snapshot", api: null, sample: 0, from: RELAY_SNAPSHOT.from, to: RELAY_SNAPSHOT.to, byDestination: RELAY_SNAPSHOT.byDestination, readAt: Date.now() } };
+      if (!cache) cache = { at: Date.now() - 25 * 60_000, value: { source: "snapshot", api: null, sample: 0, from: RELAY_SNAPSHOT.from, to: RELAY_SNAPSHOT.to, byDestination: RELAY_SNAPSHOT.byDestination, readAt: Date.now() } };
     }
   }
   return NextResponse.json(cache.value, { headers: { "cache-control": "public, s-maxage=60, stale-while-revalidate=300" } });

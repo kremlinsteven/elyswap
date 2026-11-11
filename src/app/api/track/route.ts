@@ -35,9 +35,21 @@ async function receipt(chain: ChainKey, tx: string): Promise<Receipt> {
   return { status: r.status === "0x1" ? "confirmed" : "failed", block, time: b ? Number(BigInt(b.timestamp)) : null, from: r.from, to: r.to };
 }
 
+const byHash = new Map<string, { at: number; value: RelayView }>();
+
+/** Relay request started by a transaction, from Relay's request log. Cached 60 s per hash (the keyless log is rate-limited). */
 async function relayByHash(tx: string): Promise<RelayView> {
+  const hit = byHash.get(tx.toLowerCase());
+  if (hit && Date.now() - hit.at < 60_000) return hit.value;
+  const value = await relayLookup(tx);
+  if (byHash.size > 1000) byHash.clear();
+  if (value.note === null) byHash.set(tx.toLowerCase(), { at: Date.now(), value });
+  return value;
+}
+
+async function relayLookup(tx: string): Promise<RelayView> {
   const r = await relayRequests({ hash: tx }).catch(() => null);
-  if (!r) return { found: false, status: null, requestId: null, inTxs: [], outTxs: [], seconds: null, note: "Relay's request log could not be read (its keyless log is retired on 24 Nov 2026; set RELAY_API_KEY)." };
+  if (!r) return { found: false, status: null, requestId: null, inTxs: [], outTxs: [], seconds: null, note: "Relay's request log did not answer (its keyless version is rate-limited and retires on 24 Nov 2026). Hops sent from this site are followed by their request id instead." };
   const q = r.list[0];
   if (!q) return { found: false, status: null, requestId: null, inTxs: [], outTxs: [], seconds: null, note: null };
   const ins = q.data?.inTxs ?? [];
@@ -57,12 +69,12 @@ async function relayByHash(tx: string): Promise<RelayView> {
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const requestId = url.searchParams.get("requestId") ?? "";
+  const requestId = url.searchParams.get("requestId") ?? url.searchParams.get("rid") ?? "";
   const chain = (url.searchParams.get("chain") ?? "") as ChainKey;
   const tx = (url.searchParams.get("tx") ?? "").trim();
   if (!(await allowPublic(getStore(), request, "track", RATE_LIMITS.track))) return tooMany();
 
-  if (requestId) {
+  if (requestId && !tx) {
     const s = await relayStatus(requestId).catch(() => null);
     if (!s) return NextResponse.json({ error: "Relay does not know this request (yet)." }, { status: 404 });
     return NextResponse.json({ relay: { found: true, status: s.status, requestId, inTxs: s.inTxHashes.map((h) => ({ chain: chainName(s.originChainId), hash: h })), outTxs: s.txHashes.map((h) => ({ chain: chainName(s.destinationChainId), hash: h })), seconds: null, note: null } }, { headers: { "cache-control": "no-store" } });
@@ -72,7 +84,12 @@ export async function GET(request: Request) {
   if (chain === "solana" ? !isSolSig(tx) : !isEvmHash(tx)) return NextResponse.json({ error: chain === "solana" ? "A Solana signature is 64–90 base58 characters." : "A transaction hash is 0x + 64 hex characters." }, { status: 400 });
 
   try {
-    const [rcpt, relay] = await Promise.all([chain === "solana" ? Promise.resolve(null) : receipt(chain, tx), relayByHash(tx)]);
+    const viaId = async (): Promise<RelayView | null> => {
+      const st = requestId ? await relayStatus(requestId).catch(() => null) : null;
+      if (!st || st.status === "unknown") return null;
+      return { found: true, status: st.status, requestId, inTxs: st.inTxHashes.map((h) => ({ chain: chainName(st.originChainId), hash: h })), outTxs: st.txHashes.map((h) => ({ chain: chainName(st.destinationChainId), hash: h })), seconds: null, note: null };
+    };
+    const [rcpt, relay] = await Promise.all([chain === "solana" ? Promise.resolve(null) : receipt(chain, tx), viaId().then((v) => v ?? relayByHash(tx))]);
     let canonical: TrackedWithdrawal[] = [];
     if (chain === "elysium" && rcpt?.status === "confirmed") {
       const list = await withdrawalsInTx(tx).catch(() => null);
