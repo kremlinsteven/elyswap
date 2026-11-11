@@ -46,7 +46,13 @@ forge test
 
 ### What was checked for this snapshot
 
-{{FILL: snapshot record}}
+12 Nov 2026 (UTC), Node.js 25.8.2, forge 1.5.1:
+
+- `npm run typecheck`: exit 0. `npm test`: 51 pass, 0 fail.
+- `npm run build`: 22 routes (8 pages, 8 API routes, 404, icons, robots, sitemap, llms.txt).
+- `forge test`: 38 passed, 0 failed (36 unit tests including 2 fuzz tests at 1,024 runs, and 2 invariants at 64 runs × depth 48).
+- Browser tests (Playwright, not shipped in this repository): 8 of 8 passed against an Elysium fork with the contract deployed and a HyperEVM fork, including a real unclaimed withdrawal (send #84) claimed on the HyperEVM fork with a proof built from Elysium mainnet. `verify-deployment` printed MATCH for that deployment and MISMATCH for a wrong address.
+- Not run: a claim or a bridge transfer on mainnet with real funds.
 
 ## Look at the site
 
