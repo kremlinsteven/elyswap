@@ -9,8 +9,8 @@ import { createClient } from "redis";
  *                                       (Vercel's Redis integration), or
  *   UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN, or
  *   KV_REST_API_URL + KV_REST_API_TOKEN (Upstash over its REST API).
- * Every key is prefixed with "elyearn:" (or STORE_KEY_PREFIX when set), so several
- * projects can share one Redis and a per-project Redis user (ACL ~elyearn:*) can be
+ * Every key is prefixed with "elyswap:" (or STORE_KEY_PREFIX when set), so several
+ * projects can share one Redis and a per-project Redis user (ACL ~elyswap:*) can be
  * limited to its own keys.
  *
  * Without those there is no store: the rate limiter keeps per-instance counters in memory
@@ -145,7 +145,7 @@ function tcpStore(url: string): Store {
   };
 }
 
-const KEY_PREFIX = process.env.STORE_KEY_PREFIX || "elyearn:";
+const KEY_PREFIX = process.env.STORE_KEY_PREFIX || "elyswap:";
 
 /** Puts the project prefix in front of every key the site touches. */
 function prefixed(store: Store, prefix: string): Store {

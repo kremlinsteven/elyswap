@@ -117,7 +117,7 @@ export async function waitForReceipt(hash: string, timeoutMs = 120_000): Promise
   throw new Error("No receipt yet. The transaction may still land; check the explorer.");
 }
 
-/** Plain words for a revert from ElyearnRangeBook, or the wallet's own message. */
+/** Plain words for a revert from ElyswapJourneyBook, or the wallet's own message. */
 export function explain(cause: unknown): string {
   const e = cause as { code?: number; message?: string; data?: unknown; cause?: unknown } | null;
   if (e?.code === 4001) return "The request was declined in the wallet.";
