@@ -5,6 +5,7 @@ import { rpcOn } from "@/lib/server/multirpc";
 import { rollupState, withStatus, withdrawalsInTx, type TrackedWithdrawal } from "@/lib/server/orbit";
 import { relayRequests, relayStatus } from "@/lib/server/relayapi";
 import { getStore } from "@/lib/server/store";
+import { relayMatchesTx } from "@/lib/relaymatch";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -86,7 +87,8 @@ export async function GET(request: Request) {
   try {
     const viaId = async (): Promise<RelayView | null> => {
       const st = requestId ? await relayStatus(requestId).catch(() => null) : null;
-      if (!st || st.status === "unknown") return null;
+      // Accept the request only if this very transaction started it; otherwise ignore the id and look the tx up.
+      if (!st || st.status === "unknown" || !relayMatchesTx(st.inTxHashes, tx)) return null;
       return { found: true, status: st.status, requestId, inTxs: st.inTxHashes.map((h) => ({ chain: chainName(st.originChainId), hash: h })), outTxs: st.txHashes.map((h) => ({ chain: chainName(st.destinationChainId), hash: h })), seconds: null, note: null };
     };
     const [rcpt, relay] = await Promise.all([chain === "solana" ? Promise.resolve(null) : receipt(chain, tx), viaId().then((v) => v ?? relayByHash(tx))]);

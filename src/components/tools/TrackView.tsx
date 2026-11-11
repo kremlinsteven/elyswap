@@ -6,6 +6,7 @@ import { CHAINS, type ChainKey } from "@/config/chains";
 import { fromUnits } from "@/lib/routes";
 import { duration } from "@/lib/withdrawal";
 import type { TrackedWithdrawal } from "@/lib/server/orbit";
+import { relayMatchesTx } from "@/lib/relaymatch";
 
 type Receipt = { status: "pending" | "confirmed" | "failed" | "not found"; block: number | null; time: number | null; from: string | null; to: string | null };
 type RelayView = { found: boolean; status: string | null; requestId: string | null; inTxs: { chain: string; hash: string }[]; outTxs: { chain: string; hash: string }[]; seconds: number | null; note: string | null };
@@ -35,10 +36,19 @@ export function TrackView() {
     const c = q.get("chain") as ChainKey | null;
     const t = q.get("tx");
     const rid = q.get("rid");
-    if (c && c in CHAINS && t && !saved.some((h) => h.tx === t)) saved = [...saved, { chain: c, tx: t, ...(rid && /^0x[0-9a-fA-F]{64}$/.test(rid) ? { rid } : {}) }];
+    if (c && c in CHAINS && t && !saved.some((h) => h.tx === t)) saved = [...saved, { chain: c, tx: t }];
     // Restoring this browser's list once on load.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHops(saved.slice(-8));
+    // A request id from the link is kept only if Relay says this very transaction started it.
+    if (c && t && rid && /^0x[0-9a-fA-F]{64}$/.test(rid)) {
+      fetch(`/api/track?requestId=${rid}`, { cache: "no-store" })
+        .then((r) => r.json())
+        .then((j: { relay?: { inTxs?: { hash: string }[] } }) => {
+          if (relayMatchesTx(j.relay?.inTxs?.map((x) => x.hash), t)) setHops((all) => all.map((h) => (h.tx === t ? { ...h, rid } : h)));
+        })
+        .catch(() => undefined);
+    }
   }, []);
   useEffect(() => {
     try {
