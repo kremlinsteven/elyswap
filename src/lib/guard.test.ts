@@ -1,15 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { RATE_LIMITS, allowPublic } from "./guard";
-import { CALLER_LIMIT, CALLER_WINDOW_S, POLL_MS } from "./server/ticksroute";
 
 const req = (ip: string) => new Request("http://localhost/api/x", { headers: { "x-forwarded-for": ip, "x-real-ip": ip } });
 
-test("public limits carry their own windows: the ticks budget is 60 per 10 minutes, as the alerts poll needs", () => {
-  assert.equal(RATE_LIMITS.ticks.perIp, CALLER_LIMIT);
-  assert.equal(RATE_LIMITS.ticks.windowSec, CALLER_WINDOW_S);
-  assert.ok(((RATE_LIMITS.ticks.windowSec * 1000) / POLL_MS) * 2 <= RATE_LIMITS.ticks.perIp);
-  assert.equal(RATE_LIMITS.pool.windowSec, 600);
+test("public limits carry their own windows and leave room for the planner's 30 s refresh", () => {
+  // Four routes refreshed every 30 s = 8 quotes a minute per open planner.
+  assert.ok(RATE_LIMITS.quote.perIp >= 8 * 2);
   for (const l of Object.values(RATE_LIMITS)) assert.ok(l.windowSec > 0 && l.siteWindowSec > 0 && l.perIp > 0 && l.site >= l.perIp);
 });
 

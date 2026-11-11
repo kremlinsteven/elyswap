@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type { Store } from "@/lib/server/store";
 import { clientIp, trustsProxyHeaders } from "@/lib/netkey";
 import { spend } from "@/lib/ratelimit";
-import { CALLER_LIMIT, CALLER_WINDOW_S } from "@/lib/server/ticksroute";
 
 export { clientIp };
 
@@ -83,14 +82,14 @@ export type PublicLimit = { perIp: number; windowSec: number; site: number; site
 
 /** The windows every public route uses, in one place so a limit can never be passed in the wrong position again. */
 export const RATE_LIMITS = {
-  /** /api/pools: served from one shared snapshot; a page polls once a minute plus debounced searches. */
-  pools: { perIp: 40, windowSec: 60, site: 1200, siteWindowSec: 60 },
-  /** /api/ticks: one request every 30 s per open alerts page is 20 per 10 minutes. */
-  ticks: { perIp: CALLER_LIMIT, windowSec: CALLER_WINDOW_S, site: 1200, siteWindowSec: 60 },
-  /** /api/pool: one v4 pool by id, used once per unknown watch. */
-  pool: { perIp: 30, windowSec: 600, site: 600, siteWindowSec: 60 },
-  /** /api/positions: a wallet read, cached 20 s, polled once a minute. */
-  positions: { perIp: 12, windowSec: 60, site: 300, siteWindowSec: 60 },
+  /** /api/quote: one route quote is up to two Relay calls; a planner refreshes every 30 s while visible. */
+  quote: { perIp: 30, windowSec: 60, site: 600, siteWindowSec: 60 },
+  /** /api/withdrawals: one Elysium log read per address or tx (cached 20 s) plus Outbox reads. */
+  withdrawals: { perIp: 12, windowSec: 60, site: 300, siteWindowSec: 60 },
+  /** /api/claim: a proof and a simulation, asked when the user presses Claim. */
+  claim: { perIp: 10, windowSec: 60, site: 200, siteWindowSec: 60 },
+  /** /api/track: a receipt read per hop plus one Relay lookup. */
+  track: { perIp: 30, windowSec: 60, site: 600, siteWindowSec: 60 },
 } as const satisfies Record<string, PublicLimit>;
 
 /**

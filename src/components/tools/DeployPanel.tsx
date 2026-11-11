@@ -7,7 +7,7 @@ import { CHAIN, explorerAddress, explorerTx } from "@/config/brand";
 import { explain, rpcCall, waitForReceipt } from "@/lib/client";
 import artifacts from "@/lib/contracts/artifacts.json";
 
-const ART = (artifacts as { contracts: Record<string, { creation: string; sha256: string }> }).contracts.ElyearnRangeBook;
+const ART = (artifacts as { contracts: Record<string, { creation: string; sha256: string }> }).contracts.ElyswapJourneyBook;
 
 export function DeployPanel() {
   const { address, onChain, sendTransaction } = useWallet();
@@ -37,13 +37,13 @@ export function DeployPanel() {
   }
 
   return (
-    <div className="wrap grid max-w-[820px] gap-4 pb-24 text-[13px]" data-testid="deploy-panel">
+    <div className="es-wrap grid gap-4 pb-24 text-[14px]" data-testid="deploy-panel">
       <div className="es-card grid gap-2">
         <span className="es-label">Build</span>
         <span>
-          ElyearnRangeBook · {(ART.creation.length - 2) / 2} bytes of creation code · sha256 {ART.sha256.slice(0, 16)}…
+          ElyswapJourneyBook · {(ART.creation.length - 2) / 2} bytes of creation code · sha256 {ART.sha256.slice(0, 16)}…
         </span>
-        <span className="muted">
+        <span className="text-muted">
           Network: {CHAIN.name} ({CHAIN.id}). Wallet: {address ?? "not connected"} {address && !onChain ? "(switch network first)" : ""}
         </span>
       </div>
@@ -52,7 +52,7 @@ export function DeployPanel() {
           Estimate gas
         </button>
         <button type="button" className="es-btn" disabled={state.busy || (address !== null && !onChain)} onClick={deploy} data-testid="deploy-go">
-          {address ? "Deploy ElyearnRangeBook" : "Connect wallet"}
+          {address ? "Deploy ElyswapJourneyBook" : "Connect wallet"}
         </button>
       </div>
       {state.gas ? <p className="m-0">Estimated gas: {state.gas}</p> : null}

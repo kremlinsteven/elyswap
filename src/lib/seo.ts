@@ -3,7 +3,7 @@ import { BRAND, CHAIN, hasGithub } from "@/config/brand";
 import { ASSETS } from "@/config/assets";
 
 export const HOME_TITLE = `${BRAND.name} | ${BRAND.slogan}`;
-export const HOME_DESCRIPTION = `${BRAND.name} compares concentrated-liquidity pools on ${BRAND.chainName}, plans a price range with exact tick math, and tracks a position's fees, value change and gas separately. Net results and risk, not a yield headline.`;
+export const HOME_DESCRIPTION = `Elysium's canonical bridge back to HyperEVM waits about five and a half days before a withdrawal can be claimed. ${BRAND.name} compares that wait with faster routes (their fees, measured times and the trust they add), tracks your canonical withdrawal and claims it on HyperEVM when it is ready.`;
 
 /**
  * Per-route metadata in one shape: a unique title, a description written for
@@ -88,7 +88,7 @@ export const appLd = {
   url: BRAND.url,
   applicationCategory: "FinanceApplication",
   operatingSystem: "Any (web browser)",
-  description: `Plan and track concentrated-liquidity ranges on ${CHAIN.name}: pool explorer, range planner, position monitor, performance breakdown and range alerts.`,
+  description: `Route planner, canonical withdrawal tracker with HyperEVM claim, hop tracker and journey journal for HYPE leaving ${CHAIN.name}.`,
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   publisher: { "@id": `${BRAND.url}/#org` },
 };

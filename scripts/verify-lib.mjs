@@ -1,6 +1,6 @@
 // Checks behind scripts/verify-deployment.mjs, free of I/O so they can be tested with a fake chain.
 //
-// How it decides that an address runs this repository's ElyearnRangeBook:
+// How it decides that an address runs this repository's ElyswapJourneyBook:
 //   - Runtime code is compared byte for byte with src/lib/contracts/artifacts.json (`npm run contracts:artifacts -- --check`
 //     proves that file is a fresh forge build). The contract has no immutables and no constructor arguments.
 //   - The creation transaction is required (no tx => FAIL, never MATCH). It must have succeeded, created exactly the address
@@ -8,7 +8,7 @@
 // Every check fails closed: an RPC error, an empty or malformed answer is a FAIL, never a skip.
 
 export const CHAIN_ID = 99901;
-export const NAME = "ElyearnRangeBook";
+export const NAME = "ElyswapJourneyBook";
 
 const isAddr = (v) => typeof v === "string" && /^0x[0-9a-fA-F]{40}$/.test(v);
 const isHex = (v) => typeof v === "string" && /^0x([0-9a-fA-F]{2})*$/.test(v);

@@ -8,7 +8,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import { addChainParams, CHAIN as chain } from "@/config/brand";
+import { CHAIN as chain } from "@/config/brand";
+import { CHAINS, addParams, type ChainKey } from "@/config/chains";
 import { WALLETCONNECT_PROJECT_ID } from "@/config/wallets";
 import { useLocalStore } from "@/components/wallet/useLocalStore";
 import { walletConnectProvider } from "@/components/wallet/walletconnect";
@@ -24,7 +25,6 @@ import { storageKey } from "@/config/storage";
 
 export const CHAIN_ID = chain.id;
 export const WALLETCONNECT_RDNS = "walletconnect";
-const CHAIN_ID_HEX = `0x${chain.id.toString(16)}`;
 
 type Eip1193Provider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -67,8 +67,13 @@ type WalletState = {
   /** Resolves true once an account is shared, whatever the network. */
   connect: (wallet: DiscoveredWallet) => Promise<boolean>;
   switchNetwork: () => Promise<void>;
-  /** Sends a transaction from the connected account and resolves its hash. No `to` = contract deployment. */
-  sendTransaction: (tx: { to?: string; data: string; value?: bigint }) => Promise<string>;
+  /** Asks the wallet to move to one of the journey's EVM chains (adds it when the wallet does not know it). */
+  ensureChain: (key: ChainKey) => Promise<void>;
+  /**
+   * Sends a transaction from the connected account on `chain` (default Elysium) and resolves its hash. The wallet is asked to
+   * switch first; the send is refused if it is still on another chain. No `to` = contract deployment.
+   */
+  sendTransaction: (tx: { to?: string; data: string; value?: bigint; chain?: ChainKey }) => Promise<string>;
   /** personal_sign of a plain-text message by the connected account. */
   signMessage: (message: string) => Promise<string>;
   /** eth_signTypedData_v4 by the connected account (EIP-712 payload as an object). */
@@ -257,11 +262,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     };
   }, [active, remembered, remember]);
 
-  const moveToChain = useCallback(async (provider: Eip1193Provider) => {
+  const moveToChain = useCallback(async (provider: Eip1193Provider, key: ChainKey = "elysium") => {
     try {
       await provider.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: CHAIN_ID_HEX }],
+        params: [{ chainId: `0x${CHAINS[key].id.toString(16)}` }],
       });
     } catch (switchError) {
       if (errorCode(switchError) === 4001) throw switchError;
@@ -269,7 +274,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       // and still accept the add, so try it for anything but a refusal.
       await provider.request({
         method: "wallet_addEthereumChain",
-        params: [addChainParams()],
+        params: [addParams(key)],
       });
     }
     setChainId(await readChainId(provider));
@@ -326,10 +331,28 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
   }, [active, moveToChain]);
 
+  const ensureChain = useCallback(
+    async (key: ChainKey) => {
+      if (!active) throw new Error("Connect a wallet first.");
+      if ((await readChainId(active.provider)) === CHAINS[key].id) return;
+      setSwitching(true);
+      try {
+        await moveToChain(active.provider, key);
+      } catch (cause) {
+        throw new Error(describe(cause, `Could not switch to ${CHAINS[key].name}.`));
+      } finally {
+        setSwitching(false);
+      }
+    },
+    [active, moveToChain],
+  );
+
   const sendTransaction = useCallback(
-    async (tx: { to?: string; data: string; value?: bigint }) => {
+    async (tx: { to?: string; data: string; value?: bigint; chain?: ChainKey }) => {
       if (!active || !remembered) throw new Error("Connect a wallet first.");
-      if ((await readChainId(active.provider)) !== chain.id) throw new Error(`Switch the wallet to ${chain.name} first.`);
+      const target = CHAINS[tx.chain ?? "elysium"];
+      if ((await readChainId(active.provider)) !== target.id) await ensureChain(target.key);
+      if ((await readChainId(active.provider)) !== target.id) throw new Error(`Switch the wallet to ${target.name} first.`);
       try {
         return (await active.provider.request({
           method: "eth_sendTransaction",
@@ -346,7 +369,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         throw new Error(describe(cause, "The wallet did not send the transaction."));
       }
     },
-    [active, remembered],
+    [active, remembered, ensureChain],
   );
 
   const signMessage = useCallback(
@@ -437,6 +460,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       error,
       connect,
       switchNetwork,
+      ensureChain,
       sendTransaction,
       signMessage,
       signTypedData,
@@ -455,6 +479,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       error,
       connect,
       switchNetwork,
+      ensureChain,
       sendTransaction,
       signMessage,
       signTypedData,

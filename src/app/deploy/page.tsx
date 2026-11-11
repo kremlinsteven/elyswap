@@ -15,7 +15,7 @@ export default async function DeployPage() {
   return (
     <>
       <PageHead eyebrow="Owner tool · localhost only" title="Deploy">
-        Deploys ElyearnRangeBook from the connected wallet. No constructor arguments, no owner, no funds. After it lands: put the address in src/config/contracts.ts, run npm run verify-deployment
+        Deploys ElyswapJourneyBook on Elysium from the connected wallet. No constructor arguments, no owner, no funds. After it lands: put the address in src/config/contracts.ts, run npm run verify-deployment
         with the address and the creation transaction, and remove this page.
       </PageHead>
       <DeployPanel />

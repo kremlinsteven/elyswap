@@ -1,13 +1,12 @@
 import { BRAND, isAddress } from "@/config/brand";
 import { CONTRACTS } from "@/config/contracts";
-import { ALL_POSITION_MANAGERS } from "@/config/chain";
 
 /*
  * Rules for the read-only JSON-RPC relay, kept apart from the route so they can be tested. Every request is priced in units; each network
  * has a budget and the whole site has a ceiling. Only the exact request shapes the site itself issues pass:
- *   - eth_call to the contracts the site reads (the token, ElyearnRangeBook, the v4 PositionManagers), or to ANY address when the call
+ *   - eth_call to the contracts the site reads (the token, ElyswapJourneyBook), or to ANY address when the call
  *     is one of a few plain read functions with a low gas cap;
- *   - eth_estimateGas for ElyearnRangeBook only;
+ *   - eth_estimateGas for ElyswapJourneyBook only;
  *   - no eth_getLogs at all: chain logs are read on the server, where one answer can be cached for everyone. The book's state is in its views.
  * A signed transaction is never forwarded.
  */
@@ -18,7 +17,7 @@ export const MAX_GAS = 5_000_000;
 export const MAX_FOREIGN_GAS = 200_000;
 export const MAX_BODY = 131_072;
 export const BUDGET = { units: 2_000, windowSec: 600, siteUnits: 40_000 };
-/** Call data limit in hex characters. A plan's first write, with a long link, is the largest. */
+/** Call data limit in hex characters. Opening a six-hop journey is the largest write. */
 export const MAX_CALL_DATA = 8_000;
 
 const GAS_CAP_HEX = `0x${MAX_GAS.toString(16)}`;
@@ -78,7 +77,7 @@ export const COST: Record<string, number> = {
 
 /** Contracts the browser reads through the relay by address. eth_getCode and receipts are answered for any address. */
 export function readTargets() {
-  const list: string[] = ALL_POSITION_MANAGERS.map((p) => p.positionManager);
+  const list: string[] = [];
   if (isAddress(BRAND.ca)) list.push(BRAND.ca);
   if (isAddress(CONTRACTS.book)) list.push(CONTRACTS.book);
   return new Set(list.map((a) => a.toLowerCase()));
@@ -106,7 +105,7 @@ export function checkBatch(calls: Call[], targets = readTargets(), bookAddress: 
       const data = (tx as { data?: unknown; input?: unknown }).data ?? (tx as { input?: unknown }).input;
       const foreign = !known && c.method === "eth_call" && isPlainRead(data);
       if (!known && !foreign) return { error: `${c.method} target not served by this relay.` };
-      if (c.method === "eth_estimateGas" && !(isAddress(bookAddress) && to === bookAddress.toLowerCase())) return { error: "eth_estimateGas is relayed only for the range book." };
+      if (c.method === "eth_estimateGas" && !(isAddress(bookAddress) && to === bookAddress.toLowerCase())) return { error: "eth_estimateGas is relayed only for the journey book." };
       const shaped = shapeTx(tx as Record<string, unknown>, foreign ? FOREIGN_GAS_HEX : GAS_CAP_HEX);
       if (shaped) return { error: shaped };
       if (params[1] !== undefined && !(typeof params[1] === "string" && BLOCK_TAG.test(params[1]))) return { error: "Unsupported block tag." };

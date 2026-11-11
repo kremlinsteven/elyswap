@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import { match, verifyDeployment } from "./verify-lib.mjs";
 
 const ART = JSON.parse(readFileSync(new URL("../src/lib/contracts/artifacts.json", import.meta.url), "utf8")).contracts;
-const B = ART.ElyearnRangeBook;
+const B = ART.ElyswapJourneyBook;
 const BOOK = "0x" + "9e55".padStart(40, "0");
 const TX = "0x" + "01".repeat(32);
 
@@ -26,7 +26,7 @@ test("the build has no immutables", () => assert.equal(B.immutables.length, 0));
 test("a true deployment matches", async () => assert.equal((await run({})).ok, true));
 test("a foreign runtime fails", async () => {
   const flipped = B.runtime.slice(0, -2) + (B.runtime.endsWith("00") ? "01" : "00");
-  assert.equal(match(ART, "ElyearnRangeBook", flipped).ok, false);
+  assert.equal(match(ART, "ElyswapJourneyBook", flipped).ok, false);
   assert.equal((await run({ codes: { [BOOK]: flipped } })).ok, false);
 });
 test("wrong chain fails", async () => assert.equal((await run({ chainId: "0x1237" })).ok, false));

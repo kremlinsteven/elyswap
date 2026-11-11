@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ALL_POSITION_MANAGERS } from "@/config/chain";
-const KNOWN = { address: ALL_POSITION_MANAGERS[0].positionManager };
+// No contract is deployed in this build, so every target is "foreign": only plain reads pass.
+const KNOWN = { address: "0x00000000000000000000000000000000000000b0" };
 import { MAX_CALL_DATA, MAX_FOREIGN_GAS, checkBatch, isPlainRead, runRelay } from "./relay";
 
 const call = (to: string, data = "0x", extra: Record<string, unknown> = {}) => ({ method: "eth_call", params: [{ to, data, ...extra }, "latest"] });

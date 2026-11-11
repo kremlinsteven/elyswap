@@ -8,9 +8,10 @@ import { WALLETCONNECT_RDNS, useWallet, type DiscoveredWallet } from "@/componen
 import { WALLET_CATALOG, catalogIcon } from "@/config/wallets";
 import { ArrowUpRight, CheckIcon, CloseIcon, CopyIcon, LogOutIcon, PlayIcon, RefreshIcon, WalletIcon } from "@/components/site/Icons";
 import { useFocusTrap } from "@/components/site/useFocusTrap";
+import { chainById } from "@/config/chains";
 
 /** Where "Open app" in the account menu goes: the connected wallet's own positions. */
-export const APP_HOME = "/positions";
+export const APP_HOME = "/routes";
 
 /* One wallet dialog for the whole site; every connect button opens it through this context. */
 
@@ -95,7 +96,7 @@ function WalletDialog({ onClose }: { onClose: () => void }) {
         <div className="es-modal-head">
           <div className="min-w-0">
             <h2 id="wallet-title">Connect wallet</h2>
-            <p>The pool explorer, planner, alerts and the position monitor need no wallet (paste any address). Connecting shares your address only. Anything you write to the range book opens in your wallet for you to read and sign. This site never holds a key or your funds.</p>
+            <p>The route planner and both trackers work without a wallet (paste an address or a transaction). Connecting shares your address only. Every bridge step and every claim opens in your wallet for you to read and sign; HyperEVM or Robinhood Chain is added when a step needs it. This site never holds a key or your funds.</p>
           </div>
           <button type="button" aria-label="Close" onClick={close} className="es-iconbtn shrink-0">
             <CloseIcon size={16} />
@@ -167,7 +168,7 @@ function WalletDialog({ onClose }: { onClose: () => void }) {
         <p className="es-modal-foot m-0">
           <span className="es-dot" aria-hidden="true" />
           <span>
-            {chain.name} · chain id {chain.id} · added to your wallet on connect
+            {chain.name} · chain id {chain.id} · added to your wallet on connect · HyperEVM 999 when you claim
           </span>
         </p>
       </div>
@@ -178,16 +179,15 @@ function WalletDialog({ onClose }: { onClose: () => void }) {
 
 /* ---------- navbar / app bar control ---------- */
 
-export function NavWallet({ label = "Connect", className = "es-navconnect", onlyConnected = false }: { label?: string; className?: string; onlyConnected?: boolean }) {
+export function NavWallet({ label = "Connect", className = "es-btn ghost sm", onlyConnected = false }: { label?: string; className?: string; onlyConnected?: boolean }) {
   const { address } = useWallet();
   const { open } = useWalletModal();
   if (address) return <AccountMenu />;
   if (onlyConnected) return null;
   return (
     <button type="button" onClick={open} className={className} aria-label="Connect wallet" data-testid="nav-connect">
-      <span className="txt">{label}</span>
-      <span className="arr"><ArrowUpRight size={11} /></span>
-      <span className="ico"><WalletIcon size={15} /></span>
+      <WalletIcon size={14} />
+      <span>{label}</span>
     </button>
   );
 }
@@ -230,6 +230,10 @@ function AccountMenu() {
 
   if (!address) return null;
   const wrong = chainId !== null && !onChain;
+  // HyperEVM and Robinhood Chain are journey chains (a hop or a claim needs them): amber, not red.
+  const journeyChain = wrong && chainId !== null ? chainById(chainId) : null;
+  const tone = !wrong ? "" : journeyChain ? "warn" : "bad";
+  const networkName = chainId === null ? "Reading network" : onChain ? chain.name : (journeyChain?.name ?? `Chain ${chainId}`);
 
   return (
     <div ref={root} className="flex min-w-0 items-center">
@@ -239,11 +243,11 @@ function AccountMenu() {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className="es-acct"
-        title={wrong ? `Wallet is on chain ${chainId}, not ${chain.name}` : `Connected on ${chain.name}`}
+        title={wrong ? `Wallet is on ${networkName}, not ${chain.name}` : `Connected on ${chain.name}`}
         data-testid="account-chip"
       >
         <span className="es-avatar" aria-hidden="true">
-          <span className={`es-dot ${wrong ? "bad" : ""}`} data-testid="account-dot" />
+          <span className={`es-dot ${tone}`} data-testid="account-dot" />
         </span>
         <span className="truncate">{shortAddress(address, 5, 4)}</span>
         <span className="chev" aria-hidden="true">⌄</span>
@@ -254,14 +258,14 @@ function AccountMenu() {
             <div ref={menu} role="menu" style={{ top: place.top, left: place.left }} className="es-menu" data-testid="account-menu">
               <div className="flex items-center justify-between gap-2">
                 <span className="es-label">{walletName ?? "Wallet"}</span>
-                <span className={`inline-flex items-center gap-1.5 text-[10px] ${wrong ? "es-warn" : "text-[var(--good)]"}`} data-testid="account-network">
-                  <span className={`es-dot ${wrong ? "bad" : ""}`} />
-                  {chainId === null ? "Reading network" : onChain ? chain.name : `Chain ${chainId}`}
+                <span className={`inline-flex items-center gap-1.5 text-[11px] ${!wrong ? "text-good" : journeyChain ? "text-warn" : "text-bad"}`} data-testid="account-network">
+                  <span className={`es-dot ${tone}`} />
+                  {networkName}
                 </span>
               </div>
               <span className="mt-2 block text-[11px] text-muted">{shortAddress(address, 10, 8)}</span>
-              <span className="es-label mt-3 block">Native balance</span>
-              <span className="block text-[22px] leading-tight" style={{ fontFamily: "var(--sans)", fontWeight: 600 }} data-testid="account-balance">
+              <span className="es-label mt-3 block">Balance on {chain.name}</span>
+              <span className="block text-[22px] leading-tight" style={{ fontFamily: "var(--head)", fontWeight: 500 }} data-testid="account-balance">
                 {balance === null ? "…" : `${balance} ${chain.nativeSymbol}`}
               </span>
               {wrong ? (
@@ -269,7 +273,7 @@ function AccountMenu() {
                   <RefreshIcon size={13} /> {switching ? "Confirm in wallet…" : `Switch to ${chain.name}`}
                 </button>
               ) : null}
-              {wrong && error ? <p className="mt-2 text-[11px] es-warn">{error}</p> : null}
+              {wrong && error ? <p className="es-warn mt-2 text-[12px]">{error}</p> : null}
               <div className="mt-3">
                 <Link role="menuitem" href={APP_HOME} onClick={() => setOpen(false)} className="es-menu-item" data-testid="account-open-app">
                   <PlayIcon size={13} /> Open app
