@@ -80,3 +80,9 @@ export function secondsText(s: number) {
   if (s < 5400) return `${Math.round(s / 60)} min`;
   return `${(s / 3600).toFixed(1)} h`;
 }
+
+/** A measured range in one unit: "3–7 s", "2–6 min". */
+export function rangeText(min: number, max: number) {
+  if (max < 90) return `${Math.round(min)}–${Math.round(max)} s`;
+  return `${secondsText(min)}–${secondsText(max)}`;
+}

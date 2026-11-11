@@ -68,7 +68,7 @@ export const ROUTES: RouteDef[] = [
   {
     id: "via-solana",
     name: "Via Solana",
-    short: "Two hops through SOL",
+    short: "Two hops through HYPE on Solana",
     hops: [
       { from: "elysium", to: "solana", bridge: "relay", tokenIn: "HYPE", tokenOut: "HYPE (Wormhole)", exec: "api" },
       { from: "solana", to: "hyperevm", bridge: "relay", tokenIn: "HYPE (Wormhole)", tokenOut: "HYPE", exec: "link", linkReason: "This hop is signed by a Solana wallet, which this site does not connect. It opens Relay's own app." },

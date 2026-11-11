@@ -9,7 +9,7 @@ import { useWallet } from "@/components/wallet/WalletProvider";
 import { ArrowUpRight, CheckIcon } from "@/components/site/Icons";
 import { CANONICAL, CHAINS, type ChainKey } from "@/config/chains";
 import { ARBSYS_ABI } from "@/lib/abi";
-import { CANONICAL_SNAPSHOT as C, secondsText, type Spread } from "@/lib/measured";
+import { CANONICAL_SNAPSHOT as C, rangeText, secondsText, type Spread } from "@/lib/measured";
 import { ROUTES, fromUnits, relayAppUrl, routeById, toUnits, type RouteDef } from "@/lib/routes";
 import type { HopQuote, RouteQuote } from "@/lib/server/quotes";
 import { NO_PROMISE, TRUST_LINE } from "@/lib/content";
@@ -28,8 +28,8 @@ function timeLine(r: RouteDef, stats: Stats | null): { text: string; note: strin
   const first = stats?.byDestination[r.hops[0].to];
   if (!first) return { text: "—", note: "not measured" };
   const src = stats?.source === "live" ? `live sample of ${first.n}` : `${first.n} transfers ${stats?.from} → ${stats?.to}`;
-  if (r.hops.length === 1) return { text: `${secondsText(first.min)}–${secondsText(first.max)}`, note: `median ${secondsText(first.median)}, ${src}` };
-  return { text: `${secondsText(first.min)}–${secondsText(first.max)} + hop 2`, note: `hop 1 ${src}; hop 2 not measured (bridge estimate)` };
+  if (r.hops.length === 1) return { text: rangeText(first.min, first.max), note: `median ${secondsText(first.median)}, ${src}` };
+  return { text: `${rangeText(first.min, first.max)} + hop 2`, note: `hop 1 ${src}; hop 2 not measured (bridge estimate)` };
 }
 
 export function PlannerView() {
