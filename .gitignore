@@ -29,3 +29,6 @@ next-env.d.ts
 
 /.dbg/
 
+
+# build of the live-contract snapshot (next to the running one)
+/.next-live/

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-// No contract is deployed in this build, so every target is "foreign": only plain reads pass.
+// KNOWN stands in for a contract the site reads; every other target is "foreign": only plain reads pass.
 const KNOWN = { address: "0x00000000000000000000000000000000000000b0" };
 import { MAX_CALL_DATA, MAX_FOREIGN_GAS, checkBatch, isPlainRead, runRelay } from "./relay";
 

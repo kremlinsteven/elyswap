@@ -5,7 +5,7 @@ import { encodeFunctionData, hexToString, keccak256, pad, stringToHex, toHex } f
 import { useWalletModal } from "@/components/wallet/WalletButton";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { CHAINS, chainById, type ChainKey } from "@/config/chains";
-import { CONTRACTS, bookLive } from "@/config/contracts";
+import { BOOK_DEPLOYMENT, CONTRACTS, bookLive } from "@/config/contracts";
 import { BOOK_ABI, HOP_STATUS, JOURNEY_STATUS } from "@/lib/abi";
 import { explain, read, waitForReceipt } from "@/lib/client";
 import { ROUTES, fromUnits, routeById, toUnits } from "@/lib/routes";
@@ -38,7 +38,7 @@ export function BookView() {
     <div className="es-wrap grid gap-6 pb-24">
       {!live ? (
         <div className="es-warn" data-testid="book-not-deployed">
-          ElyswapJourneyBook is not deployed on Elysium yet. The forms below are shown so you can see what it records; every write button stays disabled until the contract address is published here. The route planner and both trackers work without it.
+          This build has no journey book address configured, so every write button is disabled. The route planner and both trackers work without it.
         </div>
       ) : (
         <p className="es-small m-0">
@@ -46,7 +46,7 @@ export function BookView() {
           <a className="mono underline" href={CHAINS.elysium.addressUrl(CONTRACTS.book)} target="_blank" rel="noreferrer">
             {CONTRACTS.book}
           </a>{" "}
-          on Elysium. It holds no funds and has no admin.
+          on Elysium (created in block {BOOK_DEPLOYMENT.block.toLocaleString("en-US")}, source verified on the explorer). It holds no funds and has no admin.
         </p>
       )}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -147,7 +147,7 @@ function OpenForm({ live, onOpened }: { live: boolean; onOpened: (id: bigint) =>
         </ol>
         <p className="es-small m-0">The book records your claims: hashes you paste are checked by readers against each chain, not by the contract. Recipient: your connected address.</p>
         <button type="button" className="es-btn w-fit" disabled={!live || busy} onClick={submit} data-testid="book-open">
-          {!live ? "Not deployed yet" : busy ? "Confirm in wallet…" : address ? "Open on Elysium" : "Connect wallet"}
+          {!live ? "Not configured" : busy ? "Confirm in wallet…" : address ? "Open on Elysium" : "Connect wallet"}
         </button>
         {msg.ok ? <p className="es-note m-0">{msg.ok}</p> : null}
         {msg.err ? <p className="es-alert m-0">{msg.err}</p> : null}

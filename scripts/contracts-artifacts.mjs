@@ -1,4 +1,4 @@
-// Collects the compiled Elyswap contract into one generated file used by the /deploy page, the app and
+// Collects the compiled Elyswap contract into one generated file used by the app and
 // scripts/verify-deployment.mjs:
 //   src/lib/contracts/artifacts.json  (abi, creation + runtime bytecode, named immutable ranges)
 // Run after a forge build:

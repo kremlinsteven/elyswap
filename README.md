@@ -11,7 +11,7 @@ This repository is the working code behind https://elyswap.cash.
 - **What runs today.** A route planner with four routes (canonical bridge, Relay direct, via Robinhood Chain, via Solana), a canonical withdrawal tracker with a challenge-period countdown and a claim on HyperEVM, a hop tracker, and a journey-book page for the contract below.
 - **Live data.** Elysium and HyperEVM are read over JSON-RPC by the site's own server: L2ToL1Tx events on Elysium, the BoLD rollup and the Outbox on HyperEVM, receipts on Robinhood Chain. Quotes and the request log come from Relay's public API. Times shown are measured ranges from past transfers with their dates, never promises.
 - **Custody.** Elyswap never holds funds and charges no fee. Every step is a transaction you sign in your wallet, sent to the bridge's own contract. Fast routes add trust in the bridge operator (named next to each route).
-- **The contract** `ElyswapJourneyBook` (a public journal of multi-hop journeys) is written and tested but **not deployed yet**. It holds no funds. It needs an independent security review before anyone relies on it.
+- **The contract** `ElyswapJourneyBook` (a public journal of multi-hop journeys) is live on Elysium at `0xac622259b8420080ec2085ee08660fc7059766a3` (block 5,123,301) with its source verified on the Elysium explorer. It holds no funds. It has had no independent security review.
 - **Planned, not built:** one-click multi-hop signing, more chains and bridges, and $ELYSWAP fee discounts only if a fee ever exists. Nothing here promises any value for $ELYSWAP, and no part of the tool needs it.
 
 ## Layout
@@ -49,9 +49,10 @@ forge test
 12 Nov 2026 (UTC), Node.js 25.8.2, forge 1.5.1:
 
 - `npm run typecheck`: exit 0. `npm test`: 51 pass, 0 fail.
-- `npm run build`: 22 routes (8 pages, 8 API routes, 404, icons, robots, sitemap, llms.txt).
+- `npm run build`: 21 routes (7 pages, 8 API routes, 404, icons, robots, sitemap, llms.txt).
 - `forge test`: 38 passed, 0 failed (36 unit tests including 2 fuzz tests at 1,024 runs, and 2 invariants at 64 runs × depth 48).
 - Browser tests (Playwright, not shipped in this repository): 8 of 8 passed against an Elysium fork with the contract deployed and a HyperEVM fork, including a real unclaimed withdrawal (send #84) claimed on the HyperEVM fork with a proof built from Elysium mainnet. `verify-deployment` printed MATCH for that deployment and MISMATCH for a wrong address.
+- Mainnet: `verify-deployment` printed MATCH for the book at `0xac622259b8420080ec2085ee08660fc7059766a3` (runtime and creation input), and the Elysium explorer reports the source as verified (`getsourcecode`: ElyswapJourneyBook, v0.8.28, optimizer 200 runs, paris).
 - Not run: a claim or a bridge transfer on mainnet with real funds.
 
 ## Look at the site
@@ -68,7 +69,7 @@ Open http://localhost:6330. Everything works with no configuration: quotes, both
 
 | Contract | Address | Explorer |
 |---|---|---|
-| ElyswapJourneyBook | not deployed yet | — |
+| ElyswapJourneyBook | `0xac622259b8420080ec2085ee08660fc7059766a3` (creation tx `0x7f6f42a0ff1593684a339d5b66e0e34d65fe1ef0077c23e0d79333a7a8c7d033`, block 5,123,301) | [elysium.kinetiq.xyz](https://elysium.kinetiq.xyz/address/0xac622259b8420080ec2085ee08660fc7059766a3) (source verified) |
 
 ElyswapJourneyBook records a journey's planned hops (from chain, to chain, bridge) and, as they happen, each hop's source and delivery transaction hashes, with a state machine (Planned → Underway → Arrived or Abandoned; hops Planned → Sent → Delivered or Failed, retried at most five times). A transaction hash on a chain can prove one hop of one journey only. Each journey has an owner (two-step transfer) and an optional editor. The contract has no admin, no fee, no upgrade path, no payable function, and holds no funds. It cannot see other chains: recorded hashes are claims that readers check on each chain's explorer.
 
@@ -78,7 +79,11 @@ ElyswapJourneyBook records a journey's planned hops (from chain, to chain, bridg
 npm run verify-deployment -- --book <address> --book-tx <creation transaction hash>
 ```
 
-The script compares the bytecode on Elysium with the build in this repository and prints MATCH or the first difference. Set `VERIFY_RPC_URL` to use another Elysium endpoint.
+The script compares the bytecode on Elysium with the build in this repository and prints MATCH or the first difference. Set `VERIFY_RPC_URL` to use another Elysium endpoint. For the live book:
+
+```
+npm run verify-deployment -- --book 0xac622259b8420080ec2085ee08660fc7059766a3 --book-tx 0x7f6f42a0ff1593684a339d5b66e0e34d65fe1ef0077c23e0d79333a7a8c7d033
+```
 
 ## Add the network to your wallet
 
@@ -118,8 +123,8 @@ $ELYSWAP is a memecoin on Elysium (gas in HYPE). Contract address: announced on 
 | `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | WalletConnect in the wallet dialog | 32 hex characters |
 | `KV_REDIS_URL` | Shared rate-limit store | `redis://…` or `rediss://…` |
 
-3. After the deploy: `/` answers 200, `/api/chain` and `/api/rollup` answer JSON, `/deploy` answers 404 on the public host.
-4. Contract: deploy `ElyswapJourneyBook` on Elysium (no constructor arguments), put its address in `src/config/contracts.ts`, run `npm run verify-deployment`, and verify the source on the Elysium explorer.
+3. After the deploy: `/` answers 200, `/api/chain` and `/api/rollup` answer JSON.
+4. Contract: the site points at the live book in `src/config/contracts.ts`. To run your own, deploy `ElyswapJourneyBook` on Elysium (no constructor arguments), put its address there, run `npm run verify-deployment`, and verify the source on the Elysium explorer.
 
 ## Contributing
 

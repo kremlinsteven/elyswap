@@ -23,8 +23,8 @@ REAL routes:
   Tested on real data: send #84 (referensi/qa/claim-sim.txt) and EXECUTED on a HyperEVM anvil fork in E2E (isSpent true, balance +value).
 - `/track` hop tracker (localStorage list): receipt per EVM chain + Relay request by hash (v2 log, rate-limited, retires 24 Nov; RELAY_API_KEY → v3)
   or by request id (only accepted when the request's inTxHashes include the tracked tx — security fix 25c9deb).
-- `/journeys` ElyswapJourneyBook UI (open, record sent/delivered; Solana signatures stored as keccak256 of the text). Disabled until deployed.
-- `/method`, `/token`, `/deploy` (localhost only: 200 local, 404 public Host). API: /api/chain, /api/rollup, /api/quote, /api/withdrawals,
+- `/journeys` ElyswapJourneyBook UI (open, record sent/delivered; Solana signatures stored as keccak256 of the text), against the live book.
+- `/method`, `/token`. `/deploy` removed 12 Nov after the book went live + verified. API: /api/chain, /api/rollup, /api/quote, /api/withdrawals,
   /api/claim, /api/track, /api/stats, /api/rpc (Elysium relay for browser reads).
 PLANNED: one-click multi-hop, more chains/bridges, $ELYSWAP fee discounts (only if a fee ever exists).
 
@@ -42,8 +42,10 @@ PLANNED: one-click multi-hop, more chains/bridges, $ELYSWAP fee discounts (only 
 `contracts/src/ElyswapJourneyBook.sol` (unique name, grep'd). Journal only: no payable, no funds, no admin, no upgrade. Journey state machine
 Planned→Underway→Arrived|Abandoned, hops Planned→Sent→Delivered|Failed (retry ≤5), in-order hops, owner + editor, two-step ownership (clears editor),
 (chainId, txHash) claimable by one hop only. Deploy gas 1,825,350 (forge gas report; 1,825,866 measured on the Elysium fork).
-Self-review: `referensi/REVIEW.txt`. Explorer kit: `referensi/explorer/`. Deploy: owner from `/deploy` on localhost → set `src/config/contracts.ts` →
-`npm run verify-deployment -- --book <a> --book-tx <tx>` → verify per referensi/explorer/VERIFY.txt → delete /deploy.
+Self-review: `referensi/REVIEW.txt`. Explorer kit: `referensi/explorer/`.
+LIVE (12 Nov 2026, owner deployed from /deploy): `0xac622259b8420080ec2085ee08660fc7059766a3`, tx `0x7f6f42a0ff1593684a339d5b66e0e34d65fe1ef0077c23e0d79333a7a8c7d033`, block 5,123,301, deployer 0x68320a836341535a0010cb8d02a904e60b7e3510.
+`npm run verify-deployment` → MATCH. Source verified on https://elysium.kinetiq.xyz/address/0xac622259b8420080ec2085ee08660fc7059766a3 via the explorer API (verifysourcecode with the
+standard JSON → "Pass - Verified"; forge verify-contract refuses chain 99901: "No known Etherscan API URL"). /deploy + DeployPanel removed.
 
 ## Env
 None required. Optional:
