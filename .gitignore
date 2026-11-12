@@ -32,3 +32,6 @@ next-env.d.ts
 
 # build of the live-contract snapshot (next to the running one)
 /.next-live/
+
+# build of the owner-assets check (next to the running one)
+/.next-assets/
