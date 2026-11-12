@@ -5,5 +5,5 @@
 export const ASSETS = {
   mark: "/brand/mark.webp",
   markTile: "/brand/mark-tile.webp",
-  og: "/brand/og.webp",
+  og: "/brand/og.jpg",
 } as const;

@@ -70,7 +70,7 @@ Brands to keep out: "portage,sinas" (+ WeAreBrain, the reference's agency, also 
 ## Assets
 Owner's real files installed 12 Nov 2026 by `referensi/tools/apply-owner-assets.mjs` (reads 2026/november/12/assets/ELYSWAP_PNG.png,
 _JPG.jpg, _BANNER.jpg, never changes them): white disc with a cut-out "e" on #000. Outputs: public/brand/mark.webp (trimmed, header/footer/
-preview), mark-tile.webp, og.webp (1200x630: banner content box scaled to 76% width, centred on the banner's own #000), src/app/icon.png,
+preview), mark-tile.webp, og.jpg (1200x630, JPEG for share-preview support: banner content box scaled to 76% width, centred on the banner's own #000), src/app/icon.png,
 apple-icon.png, favicon.ico (RGBA 16/32/48, mark on a black tile so the white disc keeps its edge on light tabs). `make-assets.mjs` (old
 generated placeholder) is retired and exits unless `--force-placeholder`. Theme unchanged: the site is pure black, the mark is white.
 
