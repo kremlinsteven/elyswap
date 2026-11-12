@@ -10,7 +10,7 @@ const CA: string = "TBA";
  * out of search with noindex) instead of redirecting to a domain that does not serve the site.
  * On 12 Nov 2026 elyswap.cash existed on Cloudflare but had no A record.
  */
-export const DOMAIN_LIVE = false;
+export const DOMAIN_LIVE = true;
 
 export const isAddress = (v: string): v is `0x${string}` => /^0x[0-9a-fA-F]{40}$/.test(v);
 
