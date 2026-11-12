@@ -5,7 +5,7 @@ Owner order: `2026/november/12/perintah121126.txt` (block "elyswap", Product Kno
 section E. Port **6330** (`npm start`), anvil 6335 (Elysium fork) + 6336 (HyperEVM fork, E2E only). QA server 6331. Never `next dev`.
 
 Slogan / tagline (lead, paraphrased; owner asked AI to write it): "Don't Wait Days for Your HYPE." / "Plan the Route. Track Every Hop."
-Ticker `$ELYSWAP` from `src/config/brand.ts` (one constant). CA = `TBA`. X = https://x.com/elyswap (owner's handle; looks generic).
+Ticker `$ELYSWAP` from `src/config/brand.ts` (one constant). CA = `TBA`. X = https://x.com/elyswap_cash (real account, set 12 Nov 2026).
 GitHub public: none yet (link hidden). Domain elyswap.cash: on Cloudflare, no A record on 12 Nov → `DOMAIN_LIVE = false`.
 
 ## Product (owner PK binding)
@@ -83,7 +83,7 @@ next start 6330. Full E2E: `referensi/qa/e2e.sh` (forks + e2e build on 6331). Sc
 2. Relay direct is cheaper than the owner's team's via-Robinhood / via-Solana path on 11 Nov (6.3% vs ~7.2% / ~6.7%). All four are shown with live
    quotes; nothing is ranked "best". Confirm this framing.
 3. The via-Solana second hop needs a Solana wallet: we link to Relay's app instead of adding a Solana wallet adapter. Add Phantom-for-Solana later?
-4. Launchpad "TBA" in site/statements (Montra likely, not named). X handle x.com/elyswap looks generic.
+4. Launchpad "TBA" in site/statements (Montra likely, not named). X handle set to x.com/elyswap_cash (12 Nov 2026).
 5. Relay's keyless request log retires 24 Nov 2026: please create a Relay API key (RELAY_API_KEY) for measured times + tx-hash lookups.
 6. Journey book deploy: mainnet only (no Elysium testnet configured); it holds no funds but has had no outside security review.
 7. Owner's block says 10 statements; 20 written per the root rule.

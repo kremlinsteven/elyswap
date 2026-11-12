@@ -20,7 +20,7 @@ const SLUG = "elyswap";
 const TICKER = "ELYSWAP";
 const DOMAIN = "elyswap.cash";
 /** X account of the project. */
-const X_HANDLE = "elyswap";
+const X_HANDLE = "elyswap_cash";
 
 export const BRAND = {
   name: NAME,
