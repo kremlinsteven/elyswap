@@ -136,6 +136,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       };
       if (!detail?.info || !detail.provider) return;
       const rdns = detail.info.rdns || detail.info.uuid;
+      // Wallets that cannot add this network are left out of the list entirely.
+      if (UNSUPPORTED_WALLETS[rdns]) return;
       add({
         uuid: detail.info.uuid,
         rdns,
@@ -166,7 +168,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     // announced itself, so those visitors are not told they have no wallet.
     const legacy = window.setTimeout(() => {
       const injected = (window as { ethereum?: Eip1193Provider }).ethereum;
-      if (!injected) return;
+      if (!injected || (injected as { isPhantom?: boolean }).isPhantom) return;
       setWallets((current) =>
         current.some((entry) => entry.rdns !== WALLETCONNECT_RDNS)
           ? current
