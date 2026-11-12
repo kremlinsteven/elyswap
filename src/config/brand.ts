@@ -3,7 +3,7 @@
 // and every explorer link derive from it. Anything that is not a 0x + 40 hex address is treated as "not launched yet".
 
 /** Contract address of $ELYSWAP on Elysium. "TBA" until the token launches. */
-const CA: string = "TBA";
+const CA: string = "0xd71ea14c143feef6dbe2eee5b8c72865d4bc43ef";
 
 /**
  * True once the domain points at this deployment. While false, the production *.vercel.app host is served as is (kept

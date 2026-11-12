@@ -5,7 +5,7 @@ Owner order: `2026/november/12/perintah121126.txt` (block "elyswap", Product Kno
 section E. Port **6330** (`npm start`), anvil 6335 (Elysium fork) + 6336 (HyperEVM fork, E2E only). QA server 6331. Never `next dev`.
 
 Slogan / tagline (lead, paraphrased; owner asked AI to write it): "Don't Wait Days for Your HYPE." / "Plan the Route. Track Every Hop."
-Ticker `$ELYSWAP` from `src/config/brand.ts` (one constant). CA = `TBA`. X = https://x.com/elyswap_cash (real account, set 12 Nov 2026).
+Ticker `$ELYSWAP` from `src/config/brand.ts` (one constant). CA = `0xd71ea14c143feef6dbe2eee5b8c72865d4bc43ef` (set 12 Nov 2026; on-chain ELYSWAP/ELYSWAP on Elysium, 18 decimals, supply ~1 billion). X = https://x.com/elyswap_cash (real account, set 12 Nov 2026).
 GitHub public: none yet (link hidden). Domain elyswap.cash: on Cloudflare, no A record on 12 Nov → `DOMAIN_LIVE = false`.
 
 ## Product (owner PK binding)
